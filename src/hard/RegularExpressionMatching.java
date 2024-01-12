@@ -27,7 +27,6 @@ public class RegularExpressionMatching {
                 if (pattern.contains("*")) {
                     starPattern = pattern;
                     patternDeque.add(null); // mock the pattern to continue
-                    continue;
                 } else if (pattern.charAt(0) == '.' || pattern.charAt(0) == s.charAt(index)) {
                     index++;
                 } else {
@@ -36,14 +35,45 @@ public class RegularExpressionMatching {
             } else if (".*".equals(starPattern)) {
                 if (patternDeque.size() == 1) { // only mock available
                     return true;
-                } else {
-                    String peekPattern = patternDeque.peek();
-                    if (".*".equals(peekPattern)) {
-                        patternDeque.pollFirst();
-                        continue;
-                    } else if (peekPattern.contains("*")) {
-
+                }
+                String nextPattern = patternDeque.peek();
+                if (".*".equals(nextPattern)) {
+                    patternDeque.pollFirst();
+                } else if (nextPattern.charAt(0) == '.') {
+                    if (patternDeque.size() == 2) { // mock(.*) and nextPattern('.') => any string
+                        return true;
+                    } else {
+                        starPattern = "";
+                        patternDeque.pollLast(); // delete mock
                     }
+                }
+
+
+                else if (nextPattern.contains("*")) {
+                    if (s.charAt(index) != nextPattern.charAt(0)) {
+                        index++;
+                    } else {
+                        starPattern = "";
+                        patternDeque.pollLast(); // delete mock
+                    }
+                } else if (nextPattern.charAt(0) == '.') {
+
+                } else if (nextPattern.charAt(0) != s.charAt(index)) {
+                    index++;
+                } else {
+                    starPattern = "";
+                    patternDeque.pollLast(); // delete mock
+                }
+            } else { // star pattern like [a-z]*
+                if (patternDeque.size() == 1) { // only mock available
+                    if (s.charAt(index) == starPattern.charAt(0)) {
+                        index++;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    String nextPattern = patternDeque.peek();
+
                 }
             }
         }
